@@ -66,10 +66,13 @@ jobs:
       - name: Import KMS Key and Alias
         if: steps.checkkms.outputs.exists == 'true'
         run: |
-            echo "Importing KMS key..."
-            terraform import 'module.eks.module.kms.aws_kms_key.this["cluster"]' ${KEY_ID}
-            echo "Importing KMS alias..."
-            terraform import 'module.eks.module.kms.aws_kms_alias.this["cluster"]' ${{ env.KMS_ALIAS_ARN }}
+          echo "Importing KMS key..."
+          terraform import 'module.eks.module.kms.aws_kms_key.this["cluster"]' "${{ steps.checkkms.outputs.key_id }}"
+
+          echo "Importing KMS alias..."
+          terraform import 'module.eks.module.kms.aws_kms_alias.this["cluster"]' "${{ env.KMS_ALIAS_ARN }}"
+      
+
       - name: Terraform Plan
         run: terraform plan
 
