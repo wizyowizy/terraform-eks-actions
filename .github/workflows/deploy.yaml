@@ -12,6 +12,7 @@ env:
   AWS_REGION: us-east-1
   BUCKET_NAME: realcloud-tfstate-bucket-001
   TF_KEY: eks/terraform.tfstate
+  KMS_ALIAS_ARN: arn:aws:kms:us-east-2:361769567498:alias/eks/app-eks-cluster
 
 jobs:
   terraform:
@@ -40,6 +41,23 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+
+      - name: Check if KMS Alias exists
+        id: check-kms
+        run: |
+            # Check if KMS alias exists
+            if aws kms list-aliases --region ${{ env.AWS_REGION }} | grep -q "${{ env.KMS_ALIAS_ARN }}"; then
+            echo "KMS alias already exists. Skipping import."
+            echo "exists=true" >> $GITHUB_ENV
+            else
+            echo "KMS alias does not exist. Proceeding with import."
+            echo "exists=false" >> $GITHUB_ENV
+            fi
+
+      - name: Import KMS Alias if not exists
+        if: env.exists == 'false'
+        run: |
+            terraform import 'module.eks.module.kms.aws_kms_alias.this["cluster"]' ${{ env.KMS_ALIAS_ARN }}
 
       - name: Terraform Plan
         run: terraform plan
