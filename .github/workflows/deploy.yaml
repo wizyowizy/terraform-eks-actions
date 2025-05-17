@@ -44,17 +44,19 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Check if KMS Alias exists
+      - name: Check if KMS Alias exists and get Key ID
         id: checkkms
         run: |
           REGION=${{ env.TF_REGION }}
           ALIAS_NAME=${{ env.KMS_ALIAS_NAME }}
 
           echo "Checking for alias $ALIAS_NAME in $REGION"
-          if aws kms list-aliases --region "$REGION" | grep -q "$ALIAS_NAME"; then
+          EXISTS=$(aws kms list-aliases --region "$REGION" | jq -r --arg ALIAS "$ALIAS_NAME" '.Aliases[] | select(.AliasName == $ALIAS) | .AliasName')
+
+          if [[ "$EXISTS" == "$ALIAS_NAME" ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Alias exists. Fetching KMS Key ID..."
-            KEY_ID=$(aws kms describe-alias --alias-name "$ALIAS_NAME" --region "$REGION" --query 'AliasDescription.TargetKeyId' --output text)
+            KEY_ID=$(aws kms list-aliases --region "$REGION" | jq -r --arg ALIAS "$ALIAS_NAME" '.Aliases[] | select(.AliasName == $ALIAS) | .TargetKeyId')
             echo "key_id=$KEY_ID" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
