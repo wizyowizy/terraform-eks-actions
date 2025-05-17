@@ -12,9 +12,7 @@ env:
   AWS_REGION: us-east-1
   BUCKET_NAME: realcloud-tfstate-bucket-001
   TF_KEY: eks/terraform.tfstate
-  KMS_ALIAS_ARN: arn:aws:kms:us-east-2:361769567498:alias/eks/app-eks-cluster
   TF_REGION: us-east-2
-  KMS_ALIAS_NAME: alias/eks/app-eks-cluster
 
 jobs:
   terraform:
@@ -44,38 +42,13 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Check if KMS Alias exists and get Key ID
-        id: checkkms
-        run: |
-          REGION=${{ env.TF_REGION }}
-          ALIAS_NAME=${{ env.KMS_ALIAS_NAME }}
-
-          echo "Checking for alias $ALIAS_NAME in $REGION"
-          EXISTS=$(aws kms list-aliases --region "$REGION" | jq -r --arg ALIAS "$ALIAS_NAME" '.Aliases[] | select(.AliasName == $ALIAS) | .AliasName')
-
-          if [[ "$EXISTS" == "$ALIAS_NAME" ]]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "Alias exists. Fetching KMS Key ID..."
-            KEY_ID=$(aws kms list-aliases --region "$REGION" | jq -r --arg ALIAS "$ALIAS_NAME" '.Aliases[] | select(.AliasName == $ALIAS) | .TargetKeyId')
-            echo "key_id=$KEY_ID" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-      
-
-#      - name: Import KMS Key and Alias
-#        if: steps.checkkms.outputs.exists == 'true'
-#        run: |
-#          echo "Importing KMS alias..."
-#          terraform import 'module.eks.module.kms.aws_kms_alias.this["cluster"]' alias/eks/app-eks-cluster
-
       - name: Terraform Plan
         run: terraform plan
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
-        if: github.ref == 'refs/heads/main'
-
-#      - name: Terraform Apply
-#        run: terraform apply -auto-approve
+#      - name: Terraform Destroy
+#        run: terraform destroy -auto-approve
 #        if: github.ref == 'refs/heads/main'
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        if: github.ref == 'refs/heads/main'

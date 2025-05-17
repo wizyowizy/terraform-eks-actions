@@ -34,10 +34,11 @@ module "eks" {
   tags = {
     environment = "development"
     application = "app"
+    team        = "devops"
   }
 
   eks_managed_node_groups = {
-    dev = {
+    worker-nodes = {
       min_size     = 1
       max_size     = 3
       desired_size = 3
