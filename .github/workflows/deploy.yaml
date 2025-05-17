@@ -43,22 +43,24 @@ jobs:
         run: terraform validate
 
       - name: Check if KMS Alias exists
-        id: check-kms
+        id: checkkms
         run: |
-            # Check if KMS alias exists
-            if aws kms list-aliases --region ${{ env.AWS_REGION }} | grep -q "${{ env.KMS_ALIAS_ARN }}"; then
-            echo "KMS alias already exists. Skipping import."
-            echo "exists=true" >> $GITHUB_ENV
+            if aws kms list-aliases --region ${{ env.TF_REGION }} | grep -q "${{ env.KMS_ALIAS_NAME }}"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Fetching KMS Key ID..."
+            KEY_ID=$(aws kms describe-alias --alias-name ${{ env.KMS_ALIAS_NAME }} --region ${{ env.TF_REGION }} --query 'AliasDescription.TargetKeyId' --output text)
+            echo "key_id=$KEY_ID" >> $GITHUB_OUTPUT
             else
-            echo "KMS alias does not exist. Proceeding with import."
-            echo "exists=false" >> $GITHUB_ENV
+            echo "exists=false" >> $GITHUB_OUTPUT
             fi
 
-      - name: Import KMS Alias if not exists
-        if: env.exists == 'false'
+      - name: Import KMS Key and Alias
+        if: steps.checkkms.outputs.exists == 'true'
         run: |
+            echo "Importing KMS key..."
+            terraform import 'module.eks.module.kms.aws_kms_key.this["cluster"]' ${KEY_ID}
+            echo "Importing KMS alias..."
             terraform import 'module.eks.module.kms.aws_kms_alias.this["cluster"]' ${{ env.KMS_ALIAS_ARN }}
-
       - name: Terraform Plan
         run: terraform plan
 
