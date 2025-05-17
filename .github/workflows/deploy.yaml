@@ -14,6 +14,7 @@ env:
   TF_KEY: eks/terraform.tfstate
   KMS_ALIAS_ARN: arn:aws:kms:us-east-2:361769567498:alias/eks/app-eks-cluster
   TF_REGION: us-east-2
+  KMS_ALIAS_NAME: alias/eks/app-eks-cluster
 
 jobs:
   terraform:
