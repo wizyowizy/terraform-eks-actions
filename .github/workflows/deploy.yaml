@@ -8,6 +8,11 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: us-east-1
+  BUCKET_NAME: realcloud-tfstate-bucket-001
+  TF_KEY: eks/terraform.tfstate
+
 jobs:
   terraform:
     name: Terraform Plan & Apply
@@ -27,14 +32,22 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+          -backend-config="bucket=${{ env.BUCKET_NAME }}" \
+          -backend-config="key=${{ env.TF_KEY }}"  \
+          -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform Validate
+        run: terraform validate
 
       - name: Terraform Plan
         run: terraform plan
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
-        if: github.ref == 'refs/heads/main'
+#      - name: Terraform Destroy
+#        run: terraform destroy -auto-approve
+#        if: github.ref == 'refs/heads/main'
+
       - name: Terraform Apply
         run: terraform apply -auto-approve
         if: github.ref == 'refs/heads/main'
