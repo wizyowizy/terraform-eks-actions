@@ -67,7 +67,7 @@ jobs:
         if: steps.checkkms.outputs.exists == 'true'
         run: |
           echo "Importing KMS alias..."
-          terraform import 'module.eks.module.kms.aws_kms_alias.this["cluster"]' "${{ env.KMS_ALIAS_ARN }}"
+          terraform import 'module.eks.module.kms.aws_kms_alias.this["cluster"]' alias/eks/app-eks-cluster
 
       - name: Terraform Plan
         run: terraform plan
