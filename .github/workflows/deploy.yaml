@@ -13,6 +13,7 @@ env:
   BUCKET_NAME: realcloud-tfstate-bucket-001
   TF_KEY: eks/terraform.tfstate
   KMS_ALIAS_ARN: arn:aws:kms:us-east-2:361769567498:alias/eks/app-eks-cluster
+  TF_REGION: us-east-2
 
 jobs:
   terraform:
@@ -45,14 +46,19 @@ jobs:
       - name: Check if KMS Alias exists
         id: checkkms
         run: |
-            if aws kms list-aliases --region us-east-2 | grep -q "${{ env.KMS_ALIAS_NAME }}"; then
+          REGION=${{ env.TF_REGION }}
+          ALIAS_NAME=${{ env.KMS_ALIAS_NAME }}
+
+          echo "Checking for alias $ALIAS_NAME in $REGION"
+          if aws kms list-aliases --region "$REGION" | grep -q "$ALIAS_NAME"; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "Fetching KMS Key ID..."
-            KEY_ID=$(aws kms describe-alias --alias-name ${{ env.KMS_ALIAS_NAME }} --region es-east-2 --query 'AliasDescription.TargetKeyId' --output text)
+            echo "Alias exists. Fetching KMS Key ID..."
+            KEY_ID=$(aws kms describe-alias --alias-name "$ALIAS_NAME" --region "$REGION" --query 'AliasDescription.TargetKeyId' --output text)
             echo "key_id=$KEY_ID" >> $GITHUB_OUTPUT
-            else
+          else
             echo "exists=false" >> $GITHUB_OUTPUT
-            fi
+          fi
+      
 
       - name: Import KMS Key and Alias
         if: steps.checkkms.outputs.exists == 'true'
