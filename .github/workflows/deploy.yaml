@@ -45,10 +45,10 @@ jobs:
       - name: Check if KMS Alias exists
         id: checkkms
         run: |
-            if aws kms list-aliases --region ${{ env.TF_REGION }} | grep -q "${{ env.KMS_ALIAS_NAME }}"; then
+            if aws kms list-aliases --region us-east-2 | grep -q "${{ env.KMS_ALIAS_NAME }}"; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Fetching KMS Key ID..."
-            KEY_ID=$(aws kms describe-alias --alias-name ${{ env.KMS_ALIAS_NAME }} --region ${{ env.TF_REGION }} --query 'AliasDescription.TargetKeyId' --output text)
+            KEY_ID=$(aws kms describe-alias --alias-name ${{ env.KMS_ALIAS_NAME }} --region es-east-2 --query 'AliasDescription.TargetKeyId' --output text)
             echo "key_id=$KEY_ID" >> $GITHUB_OUTPUT
             else
             echo "exists=false" >> $GITHUB_OUTPUT
