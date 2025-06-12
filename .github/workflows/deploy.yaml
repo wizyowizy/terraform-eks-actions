@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: us-east-1
-  BUCKET_NAME: realcloud-tfstate-bucket-001
+  AWS_REGION: us-east-2
+  BUCKET_NAME: wizy-onyinye-onyejiaka2025
   TF_KEY: eks/terraform.tfstate
   TF_REGION: us-east-2
 
@@ -26,7 +26,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::361769567498:role/GitHubActionsTerraformRole
+          role-to-assume: arn:aws:iam::623386376994:role/Githubactionsawsaccessrole
           aws-region: us-east-2
 
       - name: Setup Terraform
