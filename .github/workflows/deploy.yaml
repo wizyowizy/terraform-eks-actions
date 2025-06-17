@@ -45,11 +45,11 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-      # Optional destroy step (commented out)
-      # - name: Terraform Destroy
-      #   run: terraform destroy -auto-approve
-      #   if: github.ref == 'refs/heads/main'
-
-      - name: Terraform Apply
+      - name: Terraform Destroy
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve
+        run: terraform destroy -auto-approve
+
+      # Optional apply step (commented out)
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main'
+      #   run: terraform apply -auto-approve
