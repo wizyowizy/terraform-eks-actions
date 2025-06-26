@@ -45,11 +45,11 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-      # Uncomment below block if you want destroy as an option
+      # Uncomment to allow auto-destroy
       # - name: Terraform Destroy
-      #   run: terraform destroy -auto-approve
       #   if: github.ref == 'refs/heads/main'
+      #   run: terraform destroy -auto-approve
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
         if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve

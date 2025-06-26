@@ -1,17 +1,14 @@
-variable "vpc_cidr_block" {
-  description = "The CIDR block for the VPC"
-  type        = string
+provider "aws" {
+  region = "us-east-2"
 }
 
-variable "private_subnet_cidr_blocks" {
-  description = "List of CIDR blocks for private subnets"
-  type        = list(string)
-}
+variable vpc_cidr_block {}
+variable private_subnet_cidr_blocks {}
+variable public_subnet_cidr_blocks {}
 
-variable "public_subnet_cidr_blocks" {
-  description = "List of CIDR blocks for public subnets"
-  type        = list(string)
-}
+data "aws_availability_zones" "available" {}
+
+
 module "myapp-vpc" {
   source =   "terraform-aws-modules/vpc/aws"
   version = "5.21.0"
