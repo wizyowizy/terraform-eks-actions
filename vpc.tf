@@ -1,54 +1,14 @@
 variable "vpc_cidr_block" {
-  description = "CIDR block for the VPC"
+  description = "The CIDR block for the VPC"
   type        = string
 }
 
 variable "private_subnet_cidr_blocks" {
-  description = "CIDR blocks for private subnets"
+  description = "List of CIDR blocks for private subnets"
   type        = list(string)
 }
 
 variable "public_subnet_cidr_blocks" {
-  description = "CIDR blocks for public subnets"
+  description = "List of CIDR blocks for public subnets"
   type        = list(string)
-}
-provider "aws" {
-  region = "us-east-2"
-}
-
-variable vpc_cidr_block {}
-variable private_subnet_cidr_blocks {}
-variable public_subnet_cidr_blocks {}
-
-data "aws_availability_zones" "available" {}
-
-
-module "myapp-vpc" {
-  source =   "terraform-aws-modules/vpc/aws"
-  version = "5.21.0"
-
-  name = "myapp-vpc"
-  cidr = var.vpc_cidr_block
-  private_subnets = var.private_subnet_cidr_blocks
-  public_subnets = var.public_subnet_cidr_blocks
-  azs = data.aws_availability_zones.available.names
-
-  enable_nat_gateway = true
-  single_nat_gateway = true
-  enable_dns_hostnames = true
-
-  tags = {
-    "kubernetes.io/cluster/app-eks-cluster" = "shared"
-  }
-
-  public_subnet_tags = {
-    "kubernetes.io/cluster/app-eks-cluster" = "shared"
-    "kubernetes.io/role/elb" = 1
-  }
-
-  private_subnet_tags = {
-    "kubernetes.io/cluster/app-eks-cluster" = "shared"
-    "kubernetes.io/role/internal-elb" = 1
-  }
-
 }
